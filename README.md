@@ -20,3 +20,9 @@ you should assume it can crash at any time.
 + Responses can append to the Path variable in the json. It may be expensive to Marshall and unmarahall but it will keep things consistent. 
 + Another option is to constantly wrap it in additional layers, but that can break the protocol even more. 
 + When fetching source code we can either fetch directly by decoding the path or go through the full chain. That mostly depends on the topology. In a small flat cluster the first option will work and be faster. We should consider doing both. 
+
+### Testing
+
++ Create fake backend with pre-recorded responses.
++ Run the server on avaliable port. 
++ Do the cascading setup
