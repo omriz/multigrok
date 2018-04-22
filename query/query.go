@@ -18,10 +18,7 @@ func main() {
 	} else {
 		a = *backendAddress + "/"
 	}
-	backend := backends.Backend{
-		Addr: a,
-		Type: backends.OPENGROK,
-	}
+	backend := backends.NewOpenGrokBackend(a)
 	log.Println(backend)
 	if out, err := backend.Query(*query); err != nil {
 		log.Fatalln(err)
