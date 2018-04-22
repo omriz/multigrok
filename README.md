@@ -12,4 +12,11 @@ Therefore, this project will try to implement a multiplexer over OpenGrok. It wi
 1. Stateless - the server should only hold its backends configuration and not any state of the code. Some level of caching is allowed but
 you should assume it can crash at any time.
 1. Concatination - you can build any topoplogy from the servers. You can build a "tree" structure of servers to do load balancing of the code searching.
+1. Front-end servers will have a web interface for querying and displaying the code. They'll also implement the opengrok standard for web services *(see concatenation)*
+1. *Leaf* servers can be opengrok or something else as long as they implement the same web services api. 
 
+## Future Thoughts
+
++ Responses can append to the Path variable in the json. It may be expensive to Marshall and unmarahall but it will keep things consistent. 
++ Another option is to constantly wrap it in additional layers, but that can break the protocol even more. 
++ When fetching source code we can either fetch directly by decoding the path or go through the full chain. That mostly depends on the topology. In a small flat cluster the first option will work and be faster. We should consider doing both. 
