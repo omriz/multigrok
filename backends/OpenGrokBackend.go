@@ -10,7 +10,7 @@ import (
 
 type OpenGrokBackend struct {
 	Addr   string
-	client http.Client
+	client *http.Client
 }
 
 func NewOpenGrokBackend(addr string) OpenGrokBackend {
@@ -21,19 +21,21 @@ func NewOpenGrokBackend(addr string) OpenGrokBackend {
 	return opengrokbackend
 }
 
-func (backend *OpenGrokBackend) Query(q string) (SearchResult, error) {
+func (backend *OpenGrokBackend) Query(q string) (QueryResult, error) {
+	var result QueryResult
 	s := backend.Addr + "json?" + q
 	log.Println("Sending request: " + s)
-	res, err := client.Get(s)
+	response, err := backend.client.Get(s)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
-	if res.ContentLength == 0 {
-		return nil, fmt.Errorf("Malformed request")
+	if response.ContentLength == 0 {
+		return result, fmt.Errorf("Malformed request")
 	}
-	defer r.Body.Close()
+	defer response.Body.Close()
 
-	j := json.NewDecoder(r.Body).Decode(target)
+	_ = json.NewDecoder(response.Body).Decode(result)
+	return result, nil
 	// Should now parse the json and get back the results:
 	// {"duration":2,"resultcount":0,"freetext":"pytb","results":[]}
 
