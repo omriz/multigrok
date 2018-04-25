@@ -6,16 +6,17 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 )
 
+// OpenGrokBackend is a representation of an OpenGrok server backend.
 type OpenGrokBackend struct {
 	Addr   string
 	client *http.Client
 }
 
+// NewOpenGrokBackend creates a new OpenGrok backend.
 func NewOpenGrokBackend(addr string) OpenGrokBackend {
 	var a string
 	if !strings.HasSuffix(addr, "/") {
@@ -30,9 +31,10 @@ func NewOpenGrokBackend(addr string) OpenGrokBackend {
 	return opengrokbackend
 }
 
-func (backend *OpenGrokBackend) Query(q string) (QueryResult, error) {
-	var result QueryResult
-	s := backend.Addr + "json?" + url.QueryEscape(q)
+// Query sends a query to our backend
+func (backend *OpenGrokBackend) Query(q string) (WebServiceResult, error) {
+	var result WebServiceResult
+	s := backend.Addr + "json?" + q
 	log.Println("Sending request: " + s)
 	response, err := backend.client.Get(s)
 	if err != nil {

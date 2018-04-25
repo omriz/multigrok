@@ -26,3 +26,7 @@ you should assume it can crash at any time.
 + Create fake backend with pre-recorded responses.
 + Run the server on avaliable port. 
 + Do the cascading setup
+
+### Service Structure
+General scheme for the service:
+**Frontend <-> ResponseCombiner <-> [OpenGrokBackend1, OpenGrokBackend2, SomeOtherBackend...]**

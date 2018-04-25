@@ -7,10 +7,10 @@ import (
 	"testing"
 )
 
-func TestA(t *testing.T) {
+func TestJsonDecode(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		qr := QueryResult{
+		qr := WebServiceResult{
 			Duration:    1000,
 			Path:        "",
 			Resultcount: 0,
@@ -24,5 +24,6 @@ func TestA(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	t.Log("Decode succeeded")
 	t.Log(res)
 }
