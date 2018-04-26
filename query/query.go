@@ -12,6 +12,7 @@ import (
 func main() {
 	backendsFlag := flag.String("backends", "http://localhost:8080/source", "Comma seperated list of backends")
 	query := flag.String("query", "freetext=Hello", "The query text")
+	presult := flag.Bool("print_result", false, "should we print the complete output")
 	flag.Parse()
 	var ogbs []backends.OpenGrokBackend
 	for _, a := range strings.Split(*backendsFlag, ",") {
@@ -34,4 +35,7 @@ func main() {
 		log.Fatalln(err)
 	}
 	log.Printf("Total %d results", combined.Resultcount)
+	if *presult {
+		log.Println(combined)
+	}
 }

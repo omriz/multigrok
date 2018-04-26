@@ -62,5 +62,19 @@ func (backend *OpenGrokBackend) UID() string {
 
 // Fetch - returns a resource
 func (backend *OpenGrokBackend) Fetch(prefix, path string) ([]byte, error) {
-	return nil, fmt.Errorf("Fetch is not implemented for OpenGrokBackend")
+	s := backend.addr + prefix + "/" + path
+	log.Println("Sending request: " + s)
+	response, err := backend.client.Get(s)
+	if err != nil {
+		return nil, err
+	}
+	if response.ContentLength == 0 {
+		return nil, fmt.Errorf("Malformed request")
+	}
+	defer response.Body.Close()
+	result, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return result, err
+	}
+	return result, nil
 }
