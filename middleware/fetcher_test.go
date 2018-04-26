@@ -23,3 +23,16 @@ func TestDecodeFailure(t *testing.T) {
 		t.Errorf("illegal base64 data at input byte")
 	}
 }
+
+func TestFetch(t *testing.T) {
+	servers := make(map[string]backends.Backend)
+	servers["a"] = &backends.FakeBackend{Id: "a"}
+	query := "raw/" + EncodeBackendAddress(servers["a"].UID()) + "/c.java"
+	resp, err := Fetch(servers, query)
+	if err != nil {
+		t.Errorf("Got error: %v", err)
+	}
+	if string(resp) != "a" {
+		t.Errorf("Expected 'a' as response. Got: %v", string(resp))
+	}
+}
