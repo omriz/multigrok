@@ -26,7 +26,7 @@ func main() {
 			log.Fatalln(err)
 		} else {
 			log.Printf("Found %d results", out.Resultcount)
-			results[ogb.Addr] = out
+			results[ogb.UID()] = out
 		}
 	}
 	combined, err := middleware.CombineResults(results)

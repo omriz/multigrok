@@ -12,7 +12,7 @@ import (
 
 // OpenGrokBackend is a representation of an OpenGrok server backend.
 type OpenGrokBackend struct {
-	Addr   string
+	addr   string
 	client *http.Client
 }
 
@@ -25,7 +25,7 @@ func NewOpenGrokBackend(addr string) OpenGrokBackend {
 		a = addr
 	}
 	opengrokbackend := OpenGrokBackend{
-		Addr:   a,
+		addr:   a,
 		client: &http.Client{Timeout: 120 * time.Second},
 	}
 	return opengrokbackend
@@ -34,7 +34,7 @@ func NewOpenGrokBackend(addr string) OpenGrokBackend {
 // Query sends a query to our backend
 func (backend *OpenGrokBackend) Query(q string) (WebServiceResult, error) {
 	var result WebServiceResult
-	s := backend.Addr + "json?" + q
+	s := backend.addr + "json?" + q
 	log.Println("Sending request: " + s)
 	response, err := backend.client.Get(s)
 	if err != nil {
@@ -53,4 +53,14 @@ func (backend *OpenGrokBackend) Query(q string) (WebServiceResult, error) {
 		return result, err
 	}
 	return result, nil
+}
+
+// UID returns the backend address as its identifier
+func (backend *OpenGrokBackend) UID() string {
+	return backend.addr
+}
+
+// Fetch - returns a resource
+func (backend *OpenGrokBackend) Fetch(prefix, path string) ([]byte, error) {
+	return nil, fmt.Errorf("Fetch is not implemented for OpenGrokBackend")
 }

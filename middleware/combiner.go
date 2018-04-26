@@ -31,11 +31,11 @@ func DecodeBackendAddress(part string) (string, error) {
 func CombineResults(responses map[string]backends.WebServiceResult) (backends.WebServiceResult, error) {
 	var qres []backends.QueryResult
 	total := 0
-	for addr, wres := range responses {
+	for uid, wres := range responses {
 		total += wres.Resultcount
 		for _, qr := range wres.Results {
 			nqr := qr
-			nqr.Path = "/" + EncodeBackendAddress(addr) + nqr.Path
+			nqr.Path = "/" + EncodeBackendAddress(uid) + nqr.Path
 			qres = append(qres, nqr)
 		}
 	}
