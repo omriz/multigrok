@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/omriz/multigrok/backends"
@@ -12,10 +13,15 @@ import (
 // The query is a full path such as /xref/__MULTIGROKBACKEND__ajlkjhasdlkjh__MULTIGROKBACKEND__/a/b/c.java
 func Fetch(servers map[string]backends.Backend, query string) ([]byte, error) {
 	split := strings.Split(query, "/")
+	for len(split) > 0 && split[0] == "" {
+		split = split[1:]
+	}
 	if len(split) < 3 {
 		return nil, fmt.Errorf("Can not send request: %v", query)
 	}
 	cmd := split[0]
+	log.Printf("Cmd: '%s'\n", cmd)
+	log.Printf("Encoded Backend: '%s'\n", split[1])
 	buid, err := DecodeBackendAddress(split[1])
 	if err != nil {
 		return nil, err

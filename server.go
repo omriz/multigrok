@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -29,7 +28,7 @@ func main() {
 		ogb := backends.NewOpenGrokBackend(a)
 		ogbs[ogb.UID()] = &ogb
 	}
-	s := frontend.NewMultiGrokServer(ogbs)
+	s := frontend.NewMultiGrokServer(ogbs, *port)
 	// Registring and running the server.
-	log.Fatal(s.ListenAndServe(fmt.Sprintf(":%d", *port)))
+	log.Fatal(s.ListenAndServe())
 }

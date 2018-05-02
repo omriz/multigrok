@@ -16,6 +16,14 @@ func (m *MultiGrokServer) SearchHandler(w http.ResponseWriter, req *http.Request
 		qparams.Add("freetext", val[0])
 		qparams.Del("q")
 	}
+	if val, ok := qparams["defs"]; ok {
+		qparams.Add("def", val[0])
+		qparams.Del("defs")
+	}
+	if val, ok := qparams["refs"]; ok {
+		qparams.Add("symbol", val[0])
+		qparams.Del("refs")
+	}
 	// TODO(omriz): This should be made parallel in the future.
 	results := make(map[string]backends.WebServiceResult)
 	for name, backend := range m.backends {
@@ -49,7 +57,6 @@ func (m *MultiGrokServer) SearchHandler(w http.ResponseWriter, req *http.Request
 				}
 			}
 			c += "</body></html>"
-			log.Printf("responding with %v", c)
 			w.Write([]byte(c))
 		}
 	}
