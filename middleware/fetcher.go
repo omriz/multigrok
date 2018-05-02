@@ -31,5 +31,7 @@ func Fetch(servers map[string]backends.Backend, query string) ([]byte, error) {
 			return backend.Fetch(cmd, strings.Join(split[2:], "/"))
 		}
 	}
+	// TODO(omriz): We should have a code here that attemps direct fetching for a
+	// path with no backends.
 	return nil, fmt.Errorf("Did not find any appropriate backend")
 }
