@@ -27,7 +27,11 @@ func (m *MultiGrokServer) LoopBackHandler(w http.ResponseWriter, req *http.Reque
 			w.Header().Set("Content-Type", "text/plain")
 			w.Write([]byte(fmt.Sprintf("Failed fetching responses")))
 		} else {
-			w.Header().Set("Content-Type", "text/html")
+			for k, v := range resp.Header {
+				for _, v1 := range v {
+					w.Header().Add(k, v1)
+				}
+			}
 			w.Write(temp)
 		}
 	}

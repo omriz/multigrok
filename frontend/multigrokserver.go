@@ -22,6 +22,8 @@ func NewMultiGrokServer(backends map[string]backends.Backend, port int) *MultiGr
 		client:           &http.Client{Timeout: 120 * time.Second},
 		loopbackPrefixes: []string{"/source"},
 	}
+	http.Handle("/default/", http.FileServer(http.Dir("static")))
+	http.Handle("/js/", http.FileServer(http.Dir("static")))
 	http.HandleFunc("/source/", mgs.LoopBackHandler)
 	http.HandleFunc("/search", mgs.SearchHandler)
 	http.HandleFunc("/s", mgs.SearchHandler)
