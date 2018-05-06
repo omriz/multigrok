@@ -104,6 +104,7 @@ func (m *MultiGrokServer) SearchHandler(w http.ResponseWriter, req *http.Request
 			w.Write([]byte(fmt.Sprintf("Error parsing results for query: %v.\n%v", qparams, err)))
 		} else {
 			if combined.Resultcount == 1 {
+				log.Println("One result found, redirecting to: xref" + combined.Results[0].Path)
 				http.Redirect(w, req, "xref"+combined.Results[0].Path, 303)
 				return
 			}

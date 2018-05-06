@@ -17,6 +17,9 @@ func Fetch(servers map[string]backends.Backend, query string) ([]byte, error) {
 		split = split[1:]
 	}
 	if len(split) < 3 {
+		if len(split) == 2 {
+			return fallBackFetch(servers, split[0], split[1])
+		}
 		return nil, fmt.Errorf("Can not send request: %v", query)
 	}
 	cmd := split[0]
@@ -24,7 +27,7 @@ func Fetch(servers map[string]backends.Backend, query string) ([]byte, error) {
 	log.Printf("Encoded Backend: '%s'\n", split[1])
 	buid, err := DecodeBackendAddress(split[1])
 	if err != nil {
-		return nil, err
+		return fallBackFetch(servers, cmd, strings.Join(split[1:], "/"))
 	}
 	for uid, backend := range servers {
 		if buid == uid {
@@ -34,4 +37,15 @@ func Fetch(servers map[string]backends.Backend, query string) ([]byte, error) {
 	// TODO(omriz): We should have a code here that attemps direct fetching for a
 	// path with no backends.
 	return nil, fmt.Errorf("Did not find any appropriate backend")
+}
+
+// Attempts to fetch from each backend - should be done in parallel?
+func fallBackFetch(servers map[string]backends.Backend, cmd, query string) ([]byte, error) {
+	for _, backend := range servers {
+		x, err := backend.Fetch(cmd, query)
+		if err == nil {
+			return x, nil
+		}
+	}
+	return nil, fmt.Errorf("Could not fetch" + query)
 }

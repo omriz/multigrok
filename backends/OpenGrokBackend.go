@@ -75,6 +75,9 @@ func (backend *OpenGrokBackend) Fetch(prefix, path string) ([]byte, error) {
 	if response.ContentLength == 0 {
 		return nil, fmt.Errorf("Malformed request")
 	}
+	if response.StatusCode > 400 {
+		return nil, fmt.Errorf("Error fetching page %v", response.Status)
+	}
 	defer response.Body.Close()
 	result, err := ioutil.ReadAll(response.Body)
 	if err != nil {
