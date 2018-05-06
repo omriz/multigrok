@@ -28,6 +28,7 @@ func NewMultiGrokServer(backends map[string]backends.Backend, port int) *MultiGr
 	http.Handle("/default/", http.FileServer(http.Dir("static")))
 	http.Handle("/js/", http.FileServer(http.Dir("static")))
 	http.HandleFunc("/source/", mgs.LoopBackHandler)
+	http.HandleFunc("/rawsearch", mgs.RawSearchHandler)
 	http.HandleFunc("/search", mgs.SearchHandler)
 	http.HandleFunc("/s", mgs.SearchHandler)
 	http.HandleFunc("/xref/", mgs.FetchHandler)
