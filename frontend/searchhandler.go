@@ -23,14 +23,16 @@ type fileResult struct {
 
 // SearchResultData is a container to display in the rendered results
 type searchResultData struct {
-	Query   string
-	Results map[string]*fileResult
+	Query        string
+	Results      map[string]*fileResult
+	TotalResults int
 }
 
 func restructreResults(query string, res backends.WebServiceResult) searchResultData {
 	searchRes := searchResultData{
-		Query:   query,
-		Results: make(map[string]*fileResult),
+		Query:        query,
+		Results:      make(map[string]*fileResult),
+		TotalResults: res.Resultcount,
 	}
 	for _, first := range res.Results {
 		p := filepath.Join(first.RefactorPath(), first.Filename)
