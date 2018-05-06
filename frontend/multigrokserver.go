@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 	"time"
 
@@ -13,6 +14,7 @@ type MultiGrokServer struct {
 	port             int
 	client           *http.Client
 	loopbackPrefixes []string
+	resultTmpl       *template.Template
 }
 
 func NewMultiGrokServer(backends map[string]backends.Backend, port int) *MultiGrokServer {
@@ -21,6 +23,7 @@ func NewMultiGrokServer(backends map[string]backends.Backend, port int) *MultiGr
 		port:             port,
 		client:           &http.Client{Timeout: 120 * time.Second},
 		loopbackPrefixes: []string{"/source"},
+		resultTmpl:       template.Must(template.ParseFiles("frontend/templates/results.html")),
 	}
 	http.Handle("/default/", http.FileServer(http.Dir("static")))
 	http.Handle("/js/", http.FileServer(http.Dir("static")))

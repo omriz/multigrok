@@ -1,14 +1,65 @@
 package frontend
 
 import (
-	"encoding/base64"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
+	"path/filepath"
 
 	"github.com/omriz/multigrok/backends"
 	"github.com/omriz/multigrok/middleware"
 )
+
+type lineResult struct {
+	Lineno string
+	Line   template.HTML
+}
+type fileResult struct {
+	ServerPath  string
+	Filename    string
+	LineResults []*lineResult
+}
+
+// SearchResultData is a container to display in the rendered results
+type searchResultData struct {
+	Query   string
+	Results map[string]*fileResult
+}
+
+func restructreResults(query string, res backends.WebServiceResult) searchResultData {
+	searchRes := searchResultData{
+		Query:   query,
+		Results: make(map[string]*fileResult),
+	}
+	for _, first := range res.Results {
+		p := filepath.Join(first.RefactorPath(), first.Filename)
+		if val, ok := searchRes.Results[p]; ok {
+			// We already found this file
+			z, err := first.DecodeLine()
+			if err == nil {
+				searchRes.Results[p].LineResults = append(val.LineResults, &lineResult{
+					Lineno: first.Lineno,
+					Line:   z,
+				})
+			}
+		} else {
+			// New file
+			z, err := first.DecodeLine()
+			if err == nil {
+				searchRes.Results[p] = &fileResult{
+					LineResults: []*lineResult{&lineResult{
+						Lineno: first.Lineno,
+						Line:   z,
+					}},
+					ServerPath: first.Path,
+					Filename:   first.Filename,
+				}
+			}
+		}
+	}
+	return searchRes
+}
 
 func (m *MultiGrokServer) SearchHandler(w http.ResponseWriter, req *http.Request) {
 	qparams := req.URL.Query()
@@ -23,6 +74,10 @@ func (m *MultiGrokServer) SearchHandler(w http.ResponseWriter, req *http.Request
 	if val, ok := qparams["refs"]; ok {
 		qparams.Add("symbol", val[0])
 		qparams.Del("refs")
+	}
+	if _, ok := qparams["project"]; ok {
+		// We intentionally drop the project.
+		qparams.Del("project")
 	}
 	// TODO(omriz): This should be made parallel in the future.
 	results := make(map[string]backends.WebServiceResult)
@@ -46,18 +101,15 @@ func (m *MultiGrokServer) SearchHandler(w http.ResponseWriter, req *http.Request
 			w.Header().Set("Content-Type", "text/plain")
 			w.Write([]byte(fmt.Sprintf("Error parsing results for query: %v.\n%v", qparams, err)))
 		} else {
-			w.Header().Set("Content-Type", "text/html")
-			c := fmt.Sprintf("<!DOCTYPE html>\n<html>\n<head>\n<title>Results: %s</title>\n</head>\n<body><h1>Response</h1>", qparams)
-			for _, res := range combined.Results {
-				content, err := base64.StdEncoding.DecodeString(res.Line)
-				if err != nil {
-					c += fmt.Sprintf("<b>%s></b><br>%s", res.Path, "error")
-				} else {
-					c += fmt.Sprintf("<b>%s></b><br>%s", res.Path, content)
-				}
+			if combined.Resultcount == 1 {
+				http.Redirect(w, req, "xref"+combined.Results[0].Path, 303)
+				return
 			}
-			c += "</body></html>"
-			w.Write([]byte(c))
+			// TODO(omriz): Join results under the same file path but different lines to be in the same card.
+			data := restructreResults(qparams.Encode(), combined)
+			if err := m.resultTmpl.Execute(w, data); err != nil {
+				log.Println(err)
+			}
 		}
 	}
 }

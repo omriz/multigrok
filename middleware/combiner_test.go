@@ -57,13 +57,13 @@ func TestCombineResults(t *testing.T) {
 				Path:      "/a/b/c.java",
 				Filename:  "c.java",
 				Directory: "\\/a\\/b\\/",
-				Lineno:    8,
+				Lineno:    "8",
 			},
 			{
 				Path:      "/d/e.java",
 				Filename:  "e.java",
 				Directory: "\\/d\\/",
-				Lineno:    1,
+				Lineno:    "1",
 			},
 		},
 	}
@@ -74,7 +74,7 @@ func TestCombineResults(t *testing.T) {
 				Path:      "/xx/yy/c.java",
 				Filename:  "c.java",
 				Directory: "\\/xx\\/yy\\/",
-				Lineno:    8,
+				Lineno:    "8",
 			},
 		},
 	}
@@ -88,19 +88,19 @@ func TestCombineResults(t *testing.T) {
 				Path:      "/" + EncodeBackendAddress("http://1.1.1.1/") + "/a/b/c.java",
 				Filename:  "c.java",
 				Directory: "\\/a\\/b\\/",
-				Lineno:    8,
+				Lineno:    "8",
 			},
 			{
 				Path:      "/" + EncodeBackendAddress("http://1.1.1.1/") + "/d/e.java",
 				Filename:  "e.java",
 				Directory: "\\/d\\/",
-				Lineno:    1,
+				Lineno:    "1",
 			},
 			{
 				Path:      "/" + EncodeBackendAddress("http://1.1.1.2/") + "/xx/yy/c.java",
 				Filename:  "c.java",
 				Directory: "\\/xx\\/yy\\/",
-				Lineno:    8,
+				Lineno:    "8",
 			},
 		},
 	}

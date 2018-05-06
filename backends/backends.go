@@ -1,5 +1,11 @@
 package backends
 
+import (
+	"encoding/base64"
+	"html/template"
+	"strings"
+)
+
 // Backend defines an interface to a single source fetching backend.
 type Backend interface {
 	// Query sends a query string to the backend service.
@@ -14,16 +20,31 @@ type Backend interface {
 	UID() string
 }
 
-// Note - if this ever gets more complicated we'll have to add a deep copy function.
+// QueryResult represents a single search result..
 type QueryResult struct {
 	Path      string
 	Filename  string
-	Lineno    int `json:"string,omitempty"`
+	Lineno    string
 	Line      string
 	Directory string
 }
 
-// This is a representation of the OpenGrok Web services response.
+// DecodeLine used to decode the base64 encoded html string.
+// Returns a template.HTML in order to avoid double escaping the response.
+func (q *QueryResult) DecodeLine() (template.HTML, error) {
+	d, err := base64.StdEncoding.DecodeString(q.Line)
+	if err != nil {
+		return "", err
+	}
+	return template.HTML(d), nil
+}
+
+// RefactorPath removes the escaping from the directory structure.
+func (q *QueryResult) RefactorPath() string {
+	return strings.Replace(q.Directory, "\\/", "/", -1)
+}
+
+// WebServiceResult is a representation of the OpenGrok Web services response.
 // An example can be seen at:
 // https://github.com/oracle/opengrok/wiki/Web-services
 type WebServiceResult struct {
