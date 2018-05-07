@@ -34,6 +34,8 @@ func NewMultiGrokServer(backends map[string]backends.Backend, port int) *MultiGr
 	http.HandleFunc("/xref/", mgs.FetchHandler)
 	http.HandleFunc("/raw/", mgs.FetchHandler)
 	http.HandleFunc("/history/", mgs.FetchHandler)
+	http.HandleFunc("/diff/", mgs.FetchHandler)
+	http.HandleFunc("/download/", mgs.FetchHandler)
 	http.HandleFunc("/index.html", mgs.RootHandler)
 	http.HandleFunc("/", mgs.RootHandler)
 	return &mgs
