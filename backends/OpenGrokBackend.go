@@ -35,7 +35,6 @@ func NewOpenGrokBackend(addr string) OpenGrokBackend {
 func (backend *OpenGrokBackend) Query(q string) (WebServiceResult, error) {
 	var result WebServiceResult
 	s := backend.addr + "json?" + q
-	log.Println("Sending request: " + s)
 	response, err := backend.client.Get(s)
 	if err != nil {
 		log.Printf("Got error: %v\n", err)
@@ -46,7 +45,6 @@ func (backend *OpenGrokBackend) Query(q string) (WebServiceResult, error) {
 	}
 	defer response.Body.Close()
 	temp, err := ioutil.ReadAll(response.Body)
-	log.Printf("Read Body")
 	if err != nil {
 		return result, err
 	}
@@ -54,7 +52,6 @@ func (backend *OpenGrokBackend) Query(q string) (WebServiceResult, error) {
 	if err != nil {
 		return result, err
 	}
-	log.Printf("Returning result %v\n", result)
 	return result, nil
 }
 
@@ -67,7 +64,6 @@ func (backend *OpenGrokBackend) UID() string {
 func (backend *OpenGrokBackend) Fetch(prefix, path string) ([]byte, error) {
 	a := strings.TrimPrefix(path, "/")
 	s := backend.addr + prefix + "/" + a
-	log.Println("Sending request: " + s)
 	response, err := backend.client.Get(s)
 	if err != nil {
 		return nil, err

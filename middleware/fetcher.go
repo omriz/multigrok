@@ -1,9 +1,12 @@
 package middleware
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"strings"
+	"sync"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/omriz/multigrok/backends"
 )
@@ -23,8 +26,6 @@ func Fetch(servers map[string]backends.Backend, query string) ([]byte, error) {
 		return nil, fmt.Errorf("Can not send request: %v", query)
 	}
 	cmd := split[0]
-	log.Printf("Cmd: '%s'\n", cmd)
-	log.Printf("Encoded Backend: '%s'\n", split[1])
 	buid, err := DecodeBackendAddress(split[1])
 	if err != nil {
 		return fallBackFetch(servers, cmd, strings.Join(split[1:], "/"))
@@ -41,11 +42,34 @@ func Fetch(servers map[string]backends.Backend, query string) ([]byte, error) {
 
 // Attempts to fetch from each backend - should be done in parallel?
 func fallBackFetch(servers map[string]backends.Backend, cmd, query string) ([]byte, error) {
-	for _, backend := range servers {
-		x, err := backend.Fetch(cmd, query)
-		if err == nil {
-			return x, nil
-		}
+	type Result struct {
+		mu  sync.Mutex
+		ok  bool
+		res []byte
 	}
-	return nil, fmt.Errorf("Could not fetch" + query)
+	res := &Result{}
+	g := errgroup.Group{}
+	for _, backend := range servers {
+		backend := backend // https://golang.org/doc/faq#closures_and_goroutines
+		g.Go(func() error {
+			ret, err := backend.Fetch(cmd, query)
+			if err != nil {
+				return nil
+			}
+			res.mu.Lock()
+			defer res.mu.Unlock()
+			if !res.ok {
+				res.res = ret
+				res.ok = true
+			}
+			return errors.New("cancel errorgroup")
+		})
+	}
+	g.Wait()
+	res.mu.Lock()
+	defer res.mu.Unlock()
+	if !res.ok {
+		return nil, errors.New("Failed to fetch " + query)
+	}
+	return res.res, nil
 }

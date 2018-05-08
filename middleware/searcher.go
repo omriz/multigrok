@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"log"
 	"net/url"
 	"sync"
 
@@ -34,17 +33,16 @@ func Search(servers map[string]backends.Backend, qparams url.Values) map[string]
 	var wg sync.WaitGroup
 	var m sync.Map
 	for name, backend := range servers {
+		name, backend := name, backend // https://golang.org/doc/faq#closures_and_goroutines
 		wg.Add(1)
-		go func(name string, backend backends.Backend, query string, m *sync.Map, wg *sync.WaitGroup) {
-			res, err := backend.Query(query)
-			if err != nil {
-				log.Printf("Error returned from %s: %v\n", name, err)
-			} else {
+		go func() {
+			res, err := backend.Query(q)
+			if err == nil {
 				// We only append the result if we have any.
 				m.Store(name, res)
 			}
 			wg.Done()
-		}(name, backend, q, &m, &wg)
+		}()
 	}
 	wg.Wait()
 	results := make(map[string]backends.WebServiceResult)
