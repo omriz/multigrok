@@ -15,11 +15,9 @@ you should assume it can crash at any time.
 1. Front-end servers will have a web interface for querying and displaying the code. They'll also implement the opengrok standard for web services *(see concatenation)*
 1. *Leaf* servers can be opengrok or something else as long as they implement the same web services api. 
 
-## Future Thoughts
-
-+ Responses can append to the Path variable in the json. It may be expensive to Marshall and unmarahall but it will keep things consistent. 
-+ Another option is to constantly wrap it in additional layers, but that can break the protocol even more. 
-+ When fetching source code we can either fetch directly by decoding the path or go through the full chain. That mostly depends on the topology. In a small flat cluster the first option will work and be faster. We should consider doing both. 
+The server contains an [LRU Cache](https://godoc.org/github.com/hashicorp/golang-lru) that remembers succesfull direct accesses without backends.
+This means that after a warmup period most of the direct links will go directly to the appropriate server (even in cascading configuration) without
+overloading the network.
 
 ### Testing
 
