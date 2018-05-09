@@ -17,7 +17,8 @@
     <div class="container">
         <div class="card blue-grey darken-1">
             <div class="card-content white-text">
-                <span class="card-title"><b>Query:</b>
+                <span class="card-title">
+                    <b>Query:</b>
                     <i>{{.Query}}</i>
                 </span>
                 <p>Results Found: {{.TotalResults}}</p>
@@ -27,17 +28,15 @@
         <div class="card blue-grey darken-1">
             <div class="card-content white-text">
                 <span class="card-title">{{$results.Filename}}</span>
-                <a href="/xref{{$results.ServerPath}}">
+                <a href="/xref{{$results.ServerPath}}" class="blue-grey darken-1">
                     <p>{{$filepath}}</p>
                 </a>
-            </div>
-            <div class="card-action">
-                {{ range $results.LineResults}}
-                <p>
-                    <b>
-                        <a href="/xref{{$results.ServerPath}}#{{.Lineno}}">{{.Lineno}}:</a>
-                    </b>{{.Line}}</p>
-                {{end}}
+                <div class="collection">
+                    {{ range $results.LineResults}}
+                    <a href="/xref{{$results.ServerPath}}#{{.Lineno}}" class="collection-item blue-grey darken-1 yellow-text text-darken-1">
+                        <b>{{.Lineno}}:</b> {{.Line}}</a>
+                    {{end}}
+                </div>
             </div>
         </div>
         {{end}}
