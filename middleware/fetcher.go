@@ -3,7 +3,6 @@ package middleware
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"sync"
 
@@ -51,7 +50,6 @@ func fallBackFetch(servers map[string]backends.Backend, cmd, query string, cache
 		if ok {
 			res, err := servers[b.(string)].Fetch(cmd, query)
 			if err == nil {
-				log.Println("Cache hit")
 				return res, nil
 			}
 		}
