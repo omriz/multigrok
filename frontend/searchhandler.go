@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"path/filepath"
 
 	"github.com/omriz/multigrok/backends"
@@ -29,8 +30,12 @@ type searchResultData struct {
 }
 
 func restructreResults(query string, res backends.WebServiceResult) searchResultData {
+	q, err := url.QueryUnescape(query)
+	if err != nil {
+		q = query
+	}
 	searchRes := searchResultData{
-		Query:        query,
+		Query:        q,
 		Results:      make(map[string]*fileResult),
 		TotalResults: res.Resultcount,
 	}
@@ -79,7 +84,7 @@ func (m *MultiGrokServer) SearchHandler(w http.ResponseWriter, req *http.Request
 		} else {
 			if combined.Resultcount == 1 {
 				log.Println("One result found, redirecting to: xref" + combined.Results[0].Path)
-				http.Redirect(w, req, "xref"+combined.Results[0].Path, 303)
+				http.Redirect(w, req, "xref"+combined.Results[0].Path+"#"+combined.Results[0].Lineno, 303)
 				return
 			}
 			// TODO(omriz): Join results under the same file path but different lines to be in the same card.
