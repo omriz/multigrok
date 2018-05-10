@@ -83,8 +83,9 @@ func (m *MultiGrokServer) SearchHandler(w http.ResponseWriter, req *http.Request
 			w.Write([]byte(fmt.Sprintf("Error parsing results for query: %v.\n%v", qparams, err)))
 		} else {
 			if combined.Resultcount == 1 {
-				log.Println("One result found, redirecting to: xref" + combined.Results[0].Path)
-				http.Redirect(w, req, "xref"+combined.Results[0].Path+"#"+combined.Results[0].Lineno, 303)
+				p := "xref" + combined.Results[0].Path + "#" + combined.Results[0].Lineno
+				log.Println("One result found, redirecting to: " + p)
+				http.Redirect(w, req, p, 303)
 				return
 			}
 			// TODO(omriz): Join results under the same file path but different lines to be in the same card.
