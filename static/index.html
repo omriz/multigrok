@@ -17,16 +17,18 @@
 <body class="text-center">
     <div class="jumbotron jumbotron-fluid">
         <div class="container">
-            <h1 class="display-4">MultiGrok Search</h1>
+            <h1 class="text-bold">MultiGrok Search</h1>
             <p class="lead">
                 <Form action="/rawsearch">
-                    <input class="input-field w-100" type="text" name="rawquery" autofocus>
+                    <input class="input-field w-100 p-1 form-control" type="text" name="rawquery" autofocus>
                 </Form>
+                <div class="m-2">
                 Applicable keywords:
                 <b>path, def, symbol, hist</b>.
                 <br> Please construct your query as params, for example:
                 <br>
                 <i>Myclass&path="MYPATH"</i>
+                </div>
             </p>
 
         </div>
