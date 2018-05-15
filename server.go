@@ -28,7 +28,7 @@ func main() {
 
 	flag.Parse()
 	// Validating flags
-	if !(*mode == "http" || *mode == "https" || *mode != "autoCert") {
+	if !(*mode == "http" || *mode == "https" || *mode == "autoCert") {
 		log.Fatalf("mode %s is invalid. Avaliable modes are http, https and autoCert", *mode)
 	}
 	ogbs := make(map[string]backends.Backend)
