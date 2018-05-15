@@ -19,6 +19,13 @@ The server contains an [LRU Cache](https://godoc.org/github.com/hashicorp/golang
 This means that after a warmup period most of the direct links will go directly to the appropriate server (even in cascading configuration) without
 overloading the network.
 
+### Execution
+For security purpuses we currently have three mode of operations:
+
++ **http**: Simple http server.
++ **https**: TLS encrypted communication. you need to provice cerification and key files.
++ **autoCert**: Use [Let's Encrypt](http://letsencrypt.org) to get certifications. You need to provide a host name.
+
 ### Testing
 
 + Create fake backend with pre-recorded responses.

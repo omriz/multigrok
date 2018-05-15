@@ -1,6 +1,7 @@
 package frontend
 
 import (
+	"crypto/tls"
 	"fmt"
 	"html/template"
 	"log"
@@ -9,20 +10,22 @@ import (
 
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/omriz/multigrok/backends"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 const CACHE_SIZE = 200
 
 type MultiGrokServer struct {
 	backends         map[string]backends.Backend
-	port             int
+	httpPort         int
+	httpsPort        int
 	client           *http.Client
 	loopbackPrefixes []string
 	resultTmpl       *template.Template
 	backendCache     *lru.Cache
 }
 
-func NewMultiGrokServer(backends map[string]backends.Backend, port int) *MultiGrokServer {
+func NewMultiGrokServer(backends map[string]backends.Backend, httpPort, httpsPort int) *MultiGrokServer {
 	c, err := lru.New(CACHE_SIZE)
 	if err != nil {
 		log.Printf("Failed to initalize cache: %v\n", err)
@@ -30,7 +33,8 @@ func NewMultiGrokServer(backends map[string]backends.Backend, port int) *MultiGr
 	}
 	mgs := MultiGrokServer{
 		backends:         backends,
-		port:             port,
+		httpPort:         httpPort,
+		httpsPort:        httpsPort,
 		client:           &http.Client{Timeout: 120 * time.Second},
 		loopbackPrefixes: []string{"/source"},
 		resultTmpl:       template.Must(template.ParseFiles("frontend/templates/results.html")),
@@ -54,6 +58,29 @@ func NewMultiGrokServer(backends map[string]backends.Backend, port int) *MultiGr
 	return &mgs
 }
 
-func (m *MultiGrokServer) ListenAndServe() error {
-	return http.ListenAndServe(fmt.Sprintf(":%d", m.port), nil)
+func (m *MultiGrokServer) ListenAndServeHttp() error {
+	return http.ListenAndServe(fmt.Sprintf(":%d", m.httpPort), nil)
+}
+
+func (m *MultiGrokServer) ListenAndServeHttps(crt, key string) error {
+	return http.ListenAndServeTLS(fmt.Sprintf(":%d", m.httpsPort), crt, key, nil)
+}
+
+func (m *MultiGrokServer) ListenAndServeAutoCert(domain, cache string) error {
+	certManager := autocert.Manager{
+		Prompt:     autocert.AcceptTOS,
+		HostPolicy: autocert.HostWhitelist(domain), //Your domain here
+		Cache:      autocert.DirCache(cache),       //Folder for storing certificates
+	}
+
+	server := &http.Server{
+		Addr: fmt.Sprintf(":%d", m.httpsPort),
+		TLSConfig: &tls.Config{
+			GetCertificate: certManager.GetCertificate,
+		},
+	}
+
+	go http.ListenAndServe(fmt.Sprintf(":%d", m.httpPort), certManager.HTTPHandler(nil))
+
+	return server.ListenAndServeTLS("", "") //Key and cert are coming from Let's Encrypt
 }
