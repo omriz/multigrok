@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -25,6 +24,7 @@ func main() {
 	keyFile := flag.String("key_file", "", "If using https, the path to the key file")
 	hostName := flag.String("hostname", "", "Your hostname if using auto cert renewal")
 	mode := flag.String("mode", "http", "One of the following: http,https, autoCert")
+	cacheDir := flag.String("cache_dir", "", "cache dir for certificates")
 
 	flag.Parse()
 	// Validating flags
@@ -46,14 +46,10 @@ func main() {
 		}
 		log.Fatal(s.ListenAndServeHttps(*certFile, *keyFile))
 	} else if *mode == "autoCert" {
-		if *hostName == "" {
-			log.Fatalf("Missing host_name")
+		if *hostName == "" || *cacheDir == "" {
+			log.Fatalf("Missing host_name or cache_dir")
 		}
-		cacheDir, err := ioutil.TempDir("", "certs")
-		if err != nil {
-			log.Fatalf("Failed to created certificate cache dir")
-		}
-		log.Fatal(s.ListenAndServeAutoCert(*hostName, cacheDir))
+		log.Fatal(s.ListenAndServeAutoCert(*hostName, *cacheDir))
 	} else {
 		log.Fatal(s.ListenAndServeHttp())
 	}
