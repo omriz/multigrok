@@ -20,12 +20,13 @@ type fileResult struct {
 	ServerPath  string
 	Filename    string
 	LineResults []*lineResult
+	FilePath    string
 }
 
 // SearchResultData is a container to display in the rendered results
 type searchResultData struct {
 	Query        string
-	Results      map[string]*fileResult
+	Results      []*fileResult
 	TotalResults int
 }
 
@@ -36,16 +37,17 @@ func restructreResults(query string, res backends.WebServiceResult) searchResult
 	}
 	searchRes := searchResultData{
 		Query:        q,
-		Results:      make(map[string]*fileResult),
+		Results:      make([]*fileResult, 0),
 		TotalResults: res.Resultcount,
 	}
+	resMap := make(map[string]*fileResult)
 	for _, first := range res.Results {
 		p := filepath.Join(first.RefactorPath(), first.Filename)
-		if val, ok := searchRes.Results[p]; ok {
+		if val, ok := resMap[p]; ok {
 			// We already found this file
 			z, err := first.DecodeLine()
 			if err == nil {
-				searchRes.Results[p].LineResults = append(val.LineResults, &lineResult{
+				resMap[p].LineResults = append(val.LineResults, &lineResult{
 					Lineno: first.Lineno,
 					Line:   z,
 				})
@@ -54,16 +56,29 @@ func restructreResults(query string, res backends.WebServiceResult) searchResult
 			// New file
 			z, err := first.DecodeLine()
 			if err == nil {
-				searchRes.Results[p] = &fileResult{
+				resMap[p] = &fileResult{
 					LineResults: []*lineResult{&lineResult{
 						Lineno: first.Lineno,
 						Line:   z,
 					}},
 					ServerPath: first.Path,
 					Filename:   first.Filename,
+					FilePath:   p,
 				}
 			}
 		}
+	}
+	for len(resMap) > 0 {
+		m := 0
+		var i string
+		for p, r := range resMap {
+			if len(r.LineResults) > m {
+				m = len(r.LineResults)
+				i = p
+			}
+		}
+		searchRes.Results = append(searchRes.Results, resMap[i])
+		delete(resMap, i)
 	}
 	return searchRes
 }

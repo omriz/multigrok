@@ -49,10 +49,10 @@
     <main role="main" class="m-1 mx-2">
         <div class="jumbotron">
             <h4>{{.TotalResults}} Results:</h4>
-            {{ range $filepath, $results := .Results}}
+            {{ range $results := .Results}}
             <div class="card border-secondary mb-3">
                     <a href="/xref{{$results.ServerPath}}" class="card-header">
-                        {{$filepath}}
+                        {{$results.FilePath}}
                     </a>
                 <div class="card-body small">
                     {{ range $results.LineResults}}
