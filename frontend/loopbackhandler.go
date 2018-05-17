@@ -14,7 +14,9 @@ func (m *MultiGrokServer) LoopBackHandler(w http.ResponseWriter, req *http.Reque
 	for _, x := range m.loopbackPrefixes {
 		c = strings.TrimPrefix(c, x)
 	}
-	resp, err := m.client.Get(fmt.Sprintf("http://localhost:%d%s", m.httpPort, c))
+	nreq, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:%d%s", m.httpPort, c), nil)
+	nreq = nreq.WithContext(req.Context())
+	resp, err := m.client.Do(nreq)
 	if err != nil {
 		log.Printf("Failed fetching responses %v\n", err)
 		w.Header().Set("Content-Type", "text/plain")

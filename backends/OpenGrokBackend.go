@@ -1,6 +1,7 @@
 package backends
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -32,10 +33,17 @@ func NewOpenGrokBackend(addr string) OpenGrokBackend {
 }
 
 // Query sends a query to our backend
-func (backend *OpenGrokBackend) Query(q string) (WebServiceResult, error) {
+func (backend *OpenGrokBackend) Query(ctx context.Context, q string) (WebServiceResult, error) {
 	var result WebServiceResult
 	s := backend.addr + "json?" + q
-	response, err := backend.client.Get(s)
+	req, err := http.NewRequest("GET", s, nil)
+	if err != nil {
+		log.Printf("Failed to initialize a new request %s", s)
+		return result, err
+	}
+	req = req.WithContext(ctx)
+	log.Printf("Excuting %v", req)
+	response, err := backend.client.Do(req)
 	if err != nil {
 		log.Printf("Got error: %v\n", err)
 		return result, err
@@ -61,10 +69,17 @@ func (backend *OpenGrokBackend) UID() string {
 }
 
 // Fetch - returns a resource
-func (backend *OpenGrokBackend) Fetch(prefix, path string) ([]byte, error) {
+func (backend *OpenGrokBackend) Fetch(ctx context.Context, prefix, path string) ([]byte, error) {
 	a := strings.TrimPrefix(path, "/")
 	s := backend.addr + prefix + "/" + a
-	response, err := backend.client.Get(s)
+	req, err := http.NewRequest("GET", s, nil)
+	if err != nil {
+		log.Printf("Failed to initialize a new request %s", s)
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	log.Printf("Excuting %v", req)
+	response, err := backend.client.Do(req)
 	if err != nil {
 		return nil, err
 	}

@@ -1,15 +1,18 @@
 package backends
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 type FakeBackend struct {
 	Id string
 }
 
-func (b *FakeBackend) Query(q string) (WebServiceResult, error) {
+func (b *FakeBackend) Query(ctx context.Context, q string) (WebServiceResult, error) {
 	return WebServiceResult{}, fmt.Errorf("Unimplemnted")
 }
-func (b *FakeBackend) Fetch(prefix, path string) ([]byte, error) {
+func (b *FakeBackend) Fetch(ctx context.Context, prefix, path string) ([]byte, error) {
 	// Simple implementation for testing.
 	return []byte(b.Id), nil
 }

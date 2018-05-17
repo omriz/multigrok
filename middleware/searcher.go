@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"net/url"
 	"sync"
 
@@ -27,7 +28,7 @@ func parseParams(qparams url.Values) string {
 	return qparams.Encode()
 }
 
-func Search(servers map[string]backends.Backend, qparams url.Values) map[string]backends.WebServiceResult {
+func Search(ctx context.Context, servers map[string]backends.Backend, qparams url.Values) map[string]backends.WebServiceResult {
 	q := parseParams(qparams)
 	// Parallel execution over all backends.
 	var wg sync.WaitGroup
@@ -36,7 +37,7 @@ func Search(servers map[string]backends.Backend, qparams url.Values) map[string]
 		name, backend := name, backend // https://golang.org/doc/faq#closures_and_goroutines
 		wg.Add(1)
 		go func() {
-			res, err := backend.Query(q)
+			res, err := backend.Query(ctx, q)
 			if err == nil {
 				// We only append the result if we have any.
 				m.Store(name, res)

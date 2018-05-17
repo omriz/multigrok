@@ -85,7 +85,7 @@ func restructreResults(query string, res backends.WebServiceResult) searchResult
 
 func (m *MultiGrokServer) SearchHandler(w http.ResponseWriter, req *http.Request) {
 	qparams := req.URL.Query()
-	results := middleware.Search(m.backends, qparams)
+	results := middleware.Search(req.Context(), m.backends, qparams)
 	if len(results) == 0 {
 		log.Printf("No results found")
 		w.Header().Set("Content-Type", "text/plain")
