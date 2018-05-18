@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"time"
 
 	"github.com/omriz/multigrok/backends"
 	"github.com/omriz/multigrok/middleware"
@@ -28,6 +29,7 @@ type searchResultData struct {
 	Query        string
 	Results      []*fileResult
 	TotalResults int
+	TimeSecs     float64
 }
 
 // TODO(omriz): Improve this to get better ranking - for example
@@ -94,6 +96,7 @@ func restructreResults(query string, res backends.WebServiceResult) searchResult
 
 func (m *MultiGrokServer) SearchHandler(w http.ResponseWriter, req *http.Request) {
 	qparams := req.URL.Query()
+	start := time.Now()
 	results := middleware.Search(req.Context(), m.backends, qparams)
 	if len(results) == 0 {
 		log.Printf("No results found")
@@ -114,6 +117,8 @@ func (m *MultiGrokServer) SearchHandler(w http.ResponseWriter, req *http.Request
 			}
 			// TODO(omriz): Join results under the same file path but different lines to be in the same card.
 			data := restructreResults(qparams.Encode(), combined)
+			end := time.Now()
+			data.TimeSecs = end.Sub(start).Seconds()
 			if err := m.resultTmpl.Execute(w, data); err != nil {
 				log.Println(err)
 			}
