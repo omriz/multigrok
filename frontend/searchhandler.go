@@ -30,6 +30,26 @@ type searchResultData struct {
 	TotalResults int
 }
 
+// TODO(omriz): Improve this to get better ranking - for example
+// Priority for code files (java, c, python)
+// Priority if the query string appears in the path.
+func orderResults(resMap map[string]*fileResult) []*fileResult {
+	r := make([]*fileResult, 0)
+	for len(resMap) > 0 {
+		m := 0
+		var i string
+		for p, r := range resMap {
+			if len(r.LineResults) > m {
+				m = len(r.LineResults)
+				i = p
+			}
+		}
+		r = append(r, resMap[i])
+		delete(resMap, i)
+	}
+	return r
+}
+
 func restructreResults(query string, res backends.WebServiceResult) searchResultData {
 	q, err := url.QueryUnescape(query)
 	if err != nil {
@@ -68,18 +88,7 @@ func restructreResults(query string, res backends.WebServiceResult) searchResult
 			}
 		}
 	}
-	for len(resMap) > 0 {
-		m := 0
-		var i string
-		for p, r := range resMap {
-			if len(r.LineResults) > m {
-				m = len(r.LineResults)
-				i = p
-			}
-		}
-		searchRes.Results = append(searchRes.Results, resMap[i])
-		delete(resMap, i)
-	}
+	searchRes.Results = orderResults(resMap)
 	return searchRes
 }
 
