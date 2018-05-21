@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/omriz/multigrok/backends"
@@ -32,8 +33,11 @@ type searchResultData struct {
 	TimeSecs     float64
 }
 
+// Giving priority to code files as this is a code search.
+var codeSuffixes = [...]string{".cc", ".h", ".cpp", ".hpp", ".java", ".py", ".go", ".sh", ".pl", ".c", ".m", ".proto"}
+var codeFactor = 10
+
 // TODO(omriz): Improve this to get better ranking - for example
-// Priority for code files (java, c, python)
 // Priority if the query string appears in the path.
 func orderResults(resMap map[string]*fileResult) []*fileResult {
 	r := make([]*fileResult, 0)
@@ -41,8 +45,14 @@ func orderResults(resMap map[string]*fileResult) []*fileResult {
 		m := 0
 		var i string
 		for p, r := range resMap {
-			if len(r.LineResults) > m {
-				m = len(r.LineResults)
+			w := len(r.LineResults)
+			for _, s := range codeSuffixes {
+				if strings.HasSuffix(p, s) {
+					w += codeFactor
+				}
+			}
+			if w > m {
+				m = w
 				i = p
 			}
 		}

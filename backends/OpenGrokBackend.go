@@ -42,7 +42,6 @@ func (backend *OpenGrokBackend) Query(ctx context.Context, q string) (WebService
 		return result, err
 	}
 	req = req.WithContext(ctx)
-	log.Printf("Excuting %v", req)
 	response, err := backend.client.Do(req)
 	if err != nil {
 		log.Printf("Got error: %v\n", err)
@@ -78,7 +77,6 @@ func (backend *OpenGrokBackend) Fetch(ctx context.Context, prefix, path string) 
 		return nil, err
 	}
 	req = req.WithContext(ctx)
-	log.Printf("Excuting %v", req)
 	response, err := backend.client.Do(req)
 	if err != nil {
 		return nil, err
