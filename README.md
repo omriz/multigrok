@@ -7,6 +7,8 @@ However, running on a **very** large code base tends to turn problematic as it t
 
 Therefore, this project will try to implement a multiplexer over OpenGrok. It will implement the [JSON api](https://github.com/oracle/opengrok/wiki/Web-services) used by OpenGrok and will also try to forward the *xref* structure of OpenGrok to retrieve the code.
 
+This has been tested on OpenGrok 1.1-rc26
+
 ## Design Concepts
 
 1. Stateless - the server should only hold its backends configuration and not any state of the code. Some level of caching is allowed but
