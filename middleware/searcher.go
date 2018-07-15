@@ -10,8 +10,12 @@ import (
 
 func parseParams(qparams url.Values) string {
 	if val, ok := qparams["q"]; ok {
-		qparams.Add("freetext", val[0])
+		qparams.Add("full", val[0])
 		qparams.Del("q")
+	}
+	if val, ok := qparams["freetext"]; ok {
+		qparams.Add("full", val[0])
+		qparams.Del("freetext")
 	}
 	if val, ok := qparams["defs"]; ok {
 		qparams.Add("def", val[0])

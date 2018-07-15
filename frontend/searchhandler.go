@@ -73,29 +73,31 @@ func restructreResults(query string, res backends.WebServiceResult) searchResult
 		TotalResults: res.Resultcount,
 	}
 	resMap := make(map[string]*fileResult)
-	for _, first := range res.Results {
-		p := filepath.Join(first.RefactorPath(), first.Filename)
-		if val, ok := resMap[p]; ok {
-			// We already found this file
-			z, err := first.DecodeLine()
-			if err == nil {
-				resMap[p].LineResults = append(val.LineResults, &lineResult{
-					Lineno: first.Lineno,
-					Line:   z,
-				})
-			}
-		} else {
-			// New file
-			z, err := first.DecodeLine()
-			if err == nil {
-				resMap[p] = &fileResult{
-					LineResults: []*lineResult{&lineResult{
-						Lineno: first.Lineno,
+	for p, first := range res.Results {
+		for _, r := range first {
+			if val, ok := resMap[p]; ok {
+				// We already found this file
+				z, err := r.DecodeLine()
+				if err == nil {
+					resMap[p].LineResults = append(val.LineResults, &lineResult{
+						Lineno: r.LineNumber,
 						Line:   z,
-					}},
-					ServerPath: first.Path,
-					Filename:   first.Filename,
-					FilePath:   p,
+					})
+				}
+			} else {
+				// New file
+				z, err := r.DecodeLine()
+				if err == nil {
+					pp := strings.Split(p, middleware.SEPERATOR)
+					resMap[p] = &fileResult{
+						LineResults: []*lineResult{&lineResult{
+							Lineno: r.LineNumber,
+							Line:   z,
+						}},
+						ServerPath: p,
+						Filename:   filepath.Base(p),
+						FilePath:   pp[len(pp)-1],
+					}
 				}
 			}
 		}
@@ -119,8 +121,13 @@ func (m *MultiGrokServer) SearchHandler(w http.ResponseWriter, req *http.Request
 			w.Header().Set("Content-Type", "text/plain")
 			w.Write([]byte(fmt.Sprintf("Error parsing results for query: %v.\n%v", qparams, err)))
 		} else {
+			// The key here is the filepath
+			var k []string
+			for m := range combined.Results {
+				k = append(k, m)
+			}
 			if combined.Resultcount == 1 {
-				p := "xref" + combined.Results[0].Path + "#" + combined.Results[0].Lineno
+				p := "xref" + k[0] + "#" + combined.Results[k[0]][0].LineNumber
 				log.Println("One result found, redirecting to: " + p)
 				http.Redirect(w, req, p, 303)
 				return

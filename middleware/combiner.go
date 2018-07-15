@@ -29,14 +29,13 @@ func DecodeBackendAddress(part string) (string, error) {
 // The path of the result (not the directory) will be suffixed by an escaped backend address
 // in the format: SEPERATORbase64(Address)SEPERATOR
 func CombineResults(responses map[string]backends.WebServiceResult) (backends.WebServiceResult, error) {
-	var qres []backends.QueryResult
+	qres := make(map[string][]backends.QueryResult)
 	total := 0
 	for uid, wres := range responses {
 		total += wres.Resultcount
-		for _, qr := range wres.Results {
-			nqr := qr
-			nqr.Path = "/" + EncodeBackendAddress(uid) + nqr.Path
-			qres = append(qres, nqr)
+		for path, qr := range wres.Results {
+			np := "/" + EncodeBackendAddress(uid) + path
+			qres[np] = qr
 		}
 	}
 	resp := backends.WebServiceResult{

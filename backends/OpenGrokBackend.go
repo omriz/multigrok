@@ -35,7 +35,7 @@ func NewOpenGrokBackend(addr string) OpenGrokBackend {
 // Query sends a query to our backend
 func (backend *OpenGrokBackend) Query(ctx context.Context, q string) (WebServiceResult, error) {
 	var result WebServiceResult
-	s := backend.addr + "json?" + q
+	s := backend.addr + "api/v1/search?" + q
 	req, err := http.NewRequest("GET", s, nil)
 	if err != nil {
 		log.Printf("Failed to initialize a new request %s", s)

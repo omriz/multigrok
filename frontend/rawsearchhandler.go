@@ -6,7 +6,7 @@ import (
 )
 
 // Const.
-var kKeyWords = [...]string{"def", "symbol", "path", "hist", "q", "defs", "refs", "rawquery", "freetext"}
+var kKeyWords = [...]string{"def", "symbol", "path", "hist", "q", "defs", "refs", "rawquery", "freetext", "full"}
 
 func generateNewQuery(raw string) url.Values {
 	q, err := url.ParseQuery(raw)
