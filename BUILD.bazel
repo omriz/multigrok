@@ -1,0 +1,22 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@bazel_gazelle//:def.bzl", "gazelle")
+
+# gazelle:prefix github.com/omriz/multigrok
+gazelle(name = "gazelle")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["server.go"],
+    importpath = "github.com/omriz/multigrok",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//backends:go_default_library",
+        "//frontend:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "multigrok",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)

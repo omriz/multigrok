@@ -1,0 +1,27 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "fetchhandler.go",
+        "loopbackhandler.go",
+        "multigrokserver.go",
+        "rawsearchhandler.go",
+        "roothandler.go",
+        "searchhandler.go",
+    ],
+    importpath = "github.com/omriz/multigrok/frontend",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//backends:go_default_library",
+        "//middleware:go_default_library",
+        "@com_github_hashicorp_golang_lru//:go_default_library",
+        "@org_golang_x_crypto//acme/autocert:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["rawsearchhandler_test.go"],
+    embed = [":go_default_library"],
+)

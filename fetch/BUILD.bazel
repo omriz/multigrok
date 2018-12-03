@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["fetch.go"],
+    importpath = "github.com/omriz/multigrok/fetch",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//backends:go_default_library",
+        "//middleware:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "fetch",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)
